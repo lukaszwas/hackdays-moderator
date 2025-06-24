@@ -1,7 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
 body {
-  background: #f5f6fa;
-  font-family: 'Segoe UI', 'Arial', sans-serif;
-  color: #222;
+  background: #F4EFF4;
+  font-family: 'Roboto', 'Inter', 'Segoe UI', Arial, sans-serif;
+  color: #1C1B1F;
   margin: 0;
   padding: 0;
   min-height: 100vh;
@@ -11,72 +13,82 @@ body {
   justify-content: flex-start;
 }
 .container {
-  background: #fff;
-  margin-top: 5rem;
+  background: #FFFFFF;
+  margin-top: 4rem;
   padding: 2.5rem 2rem 2rem 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-  max-width: 420px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(103,80,164,0.10), 0 1.5px 6px rgba(60,60,60,0.06);
+  max-width: 440px;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 h1 {
-  color: #005b7f;
-  font-size: 2rem;
+  color: #6750A4;
+  font-size: 2.1rem;
   margin-bottom: 1.5rem;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
 }
 textarea {
-  width: 90%;
   min-height: 90px;
-  border: 1px solid #cfd8dc;
-  border-radius: 8px;
-  padding: 1rem;
-  font-size: 1rem;
+  border: 1.5px solid #CAC4D0;
+  border-radius: 12px;
+  padding: 1.1rem;
+  font-size: 1.05rem;
   resize: vertical;
   margin-bottom: 1.2rem;
-  background: #f8fafc;
-  transition: border 0.2s;
+  background: #F7F2FA;
+  color: #1C1B1F;
+  transition: border 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 2px rgba(103,80,164,0.04);
 }
 textarea:focus {
-  border: 1.5px solid #005b7f;
+  border: 2px solid #6750A4;
   outline: none;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(103,80,164,0.10);
 }
 button {
-  background: #005b7f;
+  background: #6750A4;
   color: #fff;
   border: none;
-  border-radius: 8px;
-  padding: 0.8rem 2rem;
+  border-radius: 24px;
+  padding: 0.9rem 2.2rem;
   font-size: 1.1rem;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, box-shadow 0.2s;
   margin-bottom: 1.2rem;
+  box-shadow: 0 2px 8px rgba(103,80,164,0.10);
+  letter-spacing: 0.5px;
 }
-button:hover {
-  background: #007ea7;
+button:hover, button:focus {
+  background: #7F67BE;
+  box-shadow: 0 4px 16px rgba(103,80,164,0.13);
 }
 .result {
   margin-top: 1.5rem;
   padding: 1.2rem;
-  border-radius: 8px;
-  background: #f1f8fb;
-  font-size: 1.05rem;
+  border-radius: 14px;
+  background: #F7F2FA;
+  font-size: 1.08rem;
   text-align: left;
-  box-shadow: 0 2px 8px rgba(0,91,127,0.06);
+  box-shadow: 0 1.5px 6px rgba(103,80,164,0.07);
+  color: #1C1B1F;
 }
 .ok {
-  color: #1b7e3c;
-  font-weight: bold;
+  color: #1B7E3C;
+  font-weight: 600;
 }
 .not-ok {
-  color: #b85c00;
-  font-weight: bold;
+  color: #B3261E;
+  font-weight: 600;
 }
 .categories {
   margin-top: 0.7rem;
-  font-size: 0.98rem;
+  font-size: 1.01rem;
 }
 .categories ul {
   padding-left: 1.2em;
@@ -84,4 +96,56 @@ button:hover {
 }
 .categories li {
   margin-bottom: 0.2em;
+}
+.unsafe-gauge {
+  margin: 1.5rem 0 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #F7F2FA;
+  border-radius: 14px;
+  box-shadow: 0 1.5px 6px rgba(103,80,164,0.07);
+  padding: 1rem 1.2rem;
+}
+.unsafe-gauge label {
+  min-width: 110px;
+  color: #6750A4;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+#unsafeSlider {
+  flex: 1;
+  accent-color: #1B7E3C; /* Default green */
+  height: 6px;
+  border-radius: 5px;
+  background: linear-gradient(90deg, #1B7E3C 0%, #F7B500 50%, #B3261E 100%);
+  outline: none;
+  transition: accent-color 0.3s;
+  box-shadow: 0 1px 4px rgba(103,80,164,0.10);
+}
+#unsafeValue {
+  min-width: 40px;
+  font-weight: 700;
+  font-size: 1.13em;
+  text-shadow: 0 1px 2px rgba(103,80,164,0.07);
+  color: #6750A4;
+}
+input[type="radio"] {
+  accent-color: #6750A4;
+  margin-right: 0.4em;
+}
+label[for="unsafeSlider"] {
+  font-size: 1.05em;
+}
+@media (max-width: 600px) {
+  .container {
+    padding: 1.2rem 0.5rem 1rem 0.5rem;
+    max-width: 98vw;
+  }
+  .unsafe-gauge {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.7rem;
+    padding: 0.7rem 0.5rem;
+  }
 } 

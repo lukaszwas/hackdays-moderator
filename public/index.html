@@ -6,58 +6,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- CSS will be moved to main.css -->
   <link rel="stylesheet" href="main.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
-  <div class="container">
-    <h1>Comment Moderation</h1>
-    <form id="moderationForm">
-      <textarea id="comment" placeholder="Enter your comment..." required></textarea>
-      <div style="margin: 1em 0;">
-        <label><input type="radio" name="moderator" value="openai" checked> OpenAI</label>
-        <label style="margin-left:1em;"><input type="radio" name="moderator" value="perspectiveapi"> PerspectiveAPI</label>
-      </div>
-      <button type="submit">Submit</button>
-    </form>
-    <div id="result" class="result" style="display:none;"></div>
-  </div>
-  <script>
-    const form = document.getElementById('moderationForm');
-    const resultDiv = document.getElementById('result');
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      resultDiv.style.display = 'block';
-      resultDiv.innerHTML = '⏳ Checking...';
-      const comment = document.getElementById('comment').value;
-      const moderator = document.querySelector('input[name="moderator"]:checked').value;
-      try {
-        const res = await fetch('/moderate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ comment, moderator })
-        });
-        const data = await res.json();
-        if (data.error) {
-          resultDiv.innerHTML = `<span class='not-ok'>❌ Error: ${data.error}</span>`;
-          return;
-        }
-        let categoriesHtml = '<div class="categories"><strong>Categories:</strong><ul>';
-        for (const [cat, flagged] of Object.entries(data.categories)) {
-          categoriesHtml += `<li>${cat}: <strong>${flagged ? '🚩' : '✅'}</strong></li>`;
-        }
-        categoriesHtml += '</ul></div>';
-        let scoresHtml = '<div class="categories"><strong>Scores:</strong><ul>';
-        for (const [cat, score] of Object.entries(data.category_scores)) {
-          scoresHtml += `<li>${cat}: ${score.toFixed(3)}</li>`;
-        }
-        scoresHtml += '</ul></div>';
-        let message = data.flagged
-          ? `<span class='not-ok'>⚠️ Comment is NOT OK — please revise</span>`
-          : `<span class='ok'>✅ Comment is OK</span>`;
-        resultDiv.innerHTML = `${message}${categoriesHtml}${scoresHtml}`;
-      } catch (e) {
-        resultDiv.innerHTML = `<span class='not-ok'>❌ Error occurred</span>`;
-      }
-    });
-  </script>
+  <main class="container" aria-label="Comment Moderation">
+    <header style="display: flex; align-items: center; gap: 0.7em; margin-bottom: 2rem;">
+      <span class="material-icons" style="font-size:2.3rem; color:#6750A4;">gavel</span>
+      <h1 style="margin:0;">Comment Moderation</h1>
+    </header>
+    <section aria-label="Moderation Form" style="margin-bottom: 1.5rem;">
+      <form id="moderationForm" autocomplete="off" style="display: flex; flex-direction: column; gap: 1.2rem;">
+        <textarea id="comment" placeholder="Enter your comment..." required aria-label="Comment"></textarea>
+        <div style="display: flex; align-items: center; gap: 1.5em;">
+          <label><input type="radio" name="moderator" value="openai" checked> <span class="material-icons" style="font-size:1.1em;vertical-align:middle;color:#6750A4;">auto_awesome</span> OpenAI</label>
+          <label><input type="radio" name="moderator" value="perspectiveapi"> <span class="material-icons" style="font-size:1.1em;vertical-align:middle;color:#6750A4;">visibility</span> PerspectiveAPI</label>
+        </div>
+        <button type="submit" aria-label="Submit for Moderation" style="display: flex; align-items: center; gap: 0.5em; justify-content: center;">
+          <span class="material-icons" style="font-size:1.3em;">send</span> Submit
+        </button>
+      </form>
+    </section>
+    <section class="unsafe-gauge" aria-label="Unsafe Score Gauge">
+      <label for="unsafeSlider"><strong>Unsafe Score:</strong></label>
+      <input type="range" id="unsafeSlider" min="0" max="100" value="0" disabled aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <span id="unsafeValue">0%</span>
+    </section>
+    <section id="result" class="result" style="display:none; margin-top:2rem;" aria-live="polite"></section>
+  </main>
+  <script src="main.js"></script>
 </body>
 </html>
