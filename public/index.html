@@ -12,6 +12,10 @@
     <h1>Comment Moderation</h1>
     <form id="moderationForm">
       <textarea id="comment" placeholder="Enter your comment..." required></textarea>
+      <div style="margin: 1em 0;">
+        <label><input type="radio" name="moderator" value="openai" checked> OpenAI</label>
+        <label style="margin-left:1em;"><input type="radio" name="moderator" value="perspectiveapi"> PerspectiveAPI</label>
+      </div>
       <button type="submit">Submit</button>
     </form>
     <div id="result" class="result" style="display:none;"></div>
@@ -24,11 +28,12 @@
       resultDiv.style.display = 'block';
       resultDiv.innerHTML = '⏳ Checking...';
       const comment = document.getElementById('comment').value;
+      const moderator = document.querySelector('input[name="moderator"]:checked').value;
       try {
         const res = await fetch('/moderate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ comment })
+          body: JSON.stringify({ comment, moderator })
         });
         const data = await res.json();
         if (data.error) {
