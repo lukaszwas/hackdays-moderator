@@ -25,6 +25,12 @@ form.addEventListener('submit', async (e) => {
   container.classList.remove('wide');
   const unsafeGauge = document.querySelector('.unsafe-gauge');
   unsafeGauge.classList.add('hidden');
+  // Clear previous results
+  resultDiv.innerHTML = '';
+  resultDiv.style.display = 'none';
+  const comparisonSection = document.getElementById('comparison');
+  comparisonSection.style.display = 'none';
+  comparisonSection.innerHTML = '';
   resultDiv.style.display = 'block';
   resultDiv.innerHTML = '⏳ Checking...';
   const comment = document.getElementById('comment').value;
@@ -69,6 +75,11 @@ const comparisonSection = document.getElementById('comparison');
 compareBtn.addEventListener('click', async () => {
   const container = document.querySelector('.container');
   container.classList.add('wide');
+  // Clear previous results
+  resultDiv.innerHTML = '';
+  resultDiv.style.display = 'none';
+  comparisonSection.style.display = 'none';
+  comparisonSection.innerHTML = '';
   const comment = document.getElementById('comment').value;
   if (!comment.trim()) {
     alert('Please enter a comment to compare.');
