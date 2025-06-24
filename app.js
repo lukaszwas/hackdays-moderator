@@ -24,8 +24,21 @@ async function moderateWithPerspectiveAPI(comment) {
     languages: ['en'],
     requestedAttributes: {
       TOXICITY: {},
+      SEVERE_TOXICITY: {},
+      IDENTITY_ATTACK: {},
       INSULT: {},
-      IDENTITY_ATTACK: {}
+      PROFANITY: {},
+      THREAT: {},
+      SEXUALLY_EXPLICIT: {},
+      FLIRTATION: {},
+      ATTACK_ON_AUTHOR: {},
+      ATTACK_ON_COMMENTER: {},
+      INCOHERENT: {},
+      INFLAMMATORY: {},
+      LIKELY_TO_REJECT: {},
+      OBSCENE: {},
+      SPAM: {},
+      UNSUBSTANTIAL: {}
     }
   };
   const response = await fetch(url, {
@@ -39,13 +52,40 @@ async function moderateWithPerspectiveAPI(comment) {
   const scores = data.attributeScores || {};
   const category_scores = {
     TOXICITY: scores.TOXICITY?.summaryScore.value || 0,
+    SEVERE_TOXICITY: scores.SEVERE_TOXICITY?.summaryScore.value || 0,
+    IDENTITY_ATTACK: scores.IDENTITY_ATTACK?.summaryScore.value || 0,
     INSULT: scores.INSULT?.summaryScore.value || 0,
-    IDENTITY_ATTACK: scores.IDENTITY_ATTACK?.summaryScore.value || 0
+    PROFANITY: scores.PROFANITY?.summaryScore.value || 0,
+    THREAT: scores.THREAT?.summaryScore.value || 0,
+    SEXUALLY_EXPLICIT: scores.SEXUALLY_EXPLICIT?.summaryScore.value || 0,
+    FLIRTATION: scores.FLIRTATION?.summaryScore.value || 0,
+    ATTACK_ON_AUTHOR: scores.ATTACK_ON_AUTHOR?.summaryScore.value || 0,
+    ATTACK_ON_COMMENTER: scores.ATTACK_ON_COMMENTER?.summaryScore.value || 0,
+    INCOHERENT: scores.INCOHERENT?.summaryScore.value || 0,
+    INFLAMMATORY: scores.INFLAMMATORY?.summaryScore.value || 0,
+    LIKELY_TO_REJECT: scores.LIKELY_TO_REJECT?.summaryScore.value || 0,
+    OBSCENE: scores.OBSCENE?.summaryScore.value || 0,
+    SPAM: scores.SPAM?.summaryScore.value || 0,
+    UNSUBSTANTIAL: scores.UNSUBSTANTIAL?.summaryScore.value || 0,
+    
   };
   const categories = {
     TOXICITY: category_scores.TOXICITY > 0.5,
+    SEVERE_TOXICITY: category_scores.SEVERE_TOXICITY > 0.5,
+    IDENTITY_ATTACK: category_scores.IDENTITY_ATTACK > 0.5,
     INSULT: category_scores.INSULT > 0.5,
-    IDENTITY_ATTACK: category_scores.IDENTITY_ATTACK > 0.5
+    PROFANITY: category_scores.PROFANITY > 0.5,
+    THREAT: category_scores.THREAT > 0.5,
+    SEXUALLY_EXPLICIT: category_scores.SEXUALLY_EXPLICIT > 0.5,
+    FLIRTATION: category_scores.FLIRTATION > 0.5,
+    ATTACK_ON_AUTHOR: category_scores.ATTACK_ON_AUTHOR > 0.5,
+    ATTACK_ON_COMMENTER: category_scores.ATTACK_ON_COMMENTER > 0.5,
+    INCOHERENT: category_scores.INCOHERENT > 0.5,
+    INFLAMMATORY: category_scores.INFLAMMATORY > 0.5,
+    LIKELY_TO_REJECT: category_scores.LIKELY_TO_REJECT > 0.5,
+    OBSCENE: category_scores.OBSCENE > 0.5,
+    SPAM: category_scores.SPAM > 0.5,
+    UNSUBSTANTIAL: category_scores.UNSUBSTANTIAL > 0.5
   };
   const flagged = Object.values(categories).some(Boolean);
   return { flagged, categories, category_scores };

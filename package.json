@@ -2,9 +2,7 @@
   "name": "Moderation",
   "version": "1.0.0",
   "type": "module",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "scripts": {},
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -15,5 +13,9 @@
     "langfuse": "^3.37.2",
     "node-fetch": "^3.3.2",
     "openai": "^4.98.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.53.1",
+    "@types/node": "^24.0.3"
   }
 }
