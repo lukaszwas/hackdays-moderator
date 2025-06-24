@@ -114,14 +114,17 @@ button:hover, button:focus {
   color: #B3261E;
   font-weight: 600;
 }
+.scores,
 .categories {
   margin-top: 0.7rem;
   font-size: 1.01rem;
 }
+.scores ul,
 .categories ul {
   padding-left: 1.2em;
   margin: 0.2em 0 0 0;
 }
+.scores li,
 .categories li {
   margin-bottom: 0.2em;
 }
@@ -205,18 +208,25 @@ label[for="unsafeSlider"] {
   justify-content: center;
   align-items: flex-start;
 }
+.comparison-side-by-side{
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  width: 100%;
+}
 .comparison-card {
   background: #fff;
   border-radius: 18px;
   box-shadow: 0 2px 12px rgba(103,80,164,0.13);
   padding: 1.5rem 1.2rem 1.2rem 1.2rem;
   min-width: 270px;
-  max-width: 340px;
+  max-width: 390px;
   flex: 1 1 270px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   animation: fadeIn 0.5s;
+  width: max-content;
 }
 .comparison-card h2 {
   font-size: 1.2rem;
@@ -252,4 +262,73 @@ label[for="unsafeSlider"] {
   font-size: 1.1em !important;
   vertical-align: middle;
   color: #6750A4 !important;
+}
+.comparison-controls {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  margin-bottom: 2.5rem;
+  justify-content: center;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(103,80,164,0.10);
+  padding: 1.2rem 2rem;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.comparison-controls label {
+  font-weight: 700;
+  color: #6750A4;
+  font-size: 1.08em;
+  letter-spacing: 0.5px;
+}
+#comparisonSlider {
+  width: 220px;
+  accent-color: #f7b500;
+  height: 6px;
+  border-radius: 5px;
+  box-shadow: 0 1px 4px rgba(103,80,164,0.10);
+  outline: none;
+  transition: accent-color 0.3s;
+}
+#comparisonValue {
+  min-width: 48px;
+  font-weight: 700;
+  font-size: 1.15em;
+  text-align: center;
+  color: #6750A4;
+}
+@media (max-width: 600px) {
+  .comparison-controls {
+    flex-direction: column;
+    gap: 0.7rem;
+    padding: 0.7rem 0.5rem;
+    max-width: 98vw;
+  }
+  #comparisonSlider {
+    width: 100%;
+    min-width: 120px;
+  }
+}
+.verdict {
+  margin-bottom: 1rem;
+  padding: 0.7em 1em;
+  border-radius: 12px;
+  font-size: 1.08em;
+  font-weight: 600;
+  box-shadow: 0 1.5px 6px rgba(103,80,164,0.07);
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  justify-content: center;
+  letter-spacing: 0.2px;
+}
+.verdict.ok {
+  background: #E6F4EA;
+  color: #1B7E3C;
+}
+.verdict.not-ok {
+  background: #FDECEA;
+  color: #B3261E;
 } 
