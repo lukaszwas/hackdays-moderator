@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Comment Moderation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background: #f5f6fa;
+      font-family: 'Segoe UI', 'Arial', sans-serif;
+      color: #222;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .container {
+      background: #fff;
+      margin-top: 5rem;
+      padding: 2.5rem 2rem 2rem 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      max-width: 420px;
+      width: 100%;
+    }
+    h1 {
+      color: #005b7f;
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    textarea {
+      width: 90%;
+      min-height: 90px;
+      border: 1px solid #cfd8dc;
+      border-radius: 8px;
+      padding: 1rem;
+      font-size: 1rem;
+      resize: vertical;
+      margin-bottom: 1.2rem;
+      background: #f8fafc;
+      transition: border 0.2s;
+    }
+    textarea:focus {
+      border: 1.5px solid #005b7f;
+      outline: none;
+    }
+    button {
+      background: #005b7f;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.8rem 2rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-bottom: 1.2rem;
+    }
+    button:hover {
+      background: #007ea7;
+    }
+    .result {
+      margin-top: 1.5rem;
+      padding: 1.2rem;
+      border-radius: 8px;
+      background: #f1f8fb;
+      font-size: 1.05rem;
+      text-align: left;
+      box-shadow: 0 2px 8px rgba(0,91,127,0.06);
+    }
+    .ok {
+      color: #1b7e3c;
+      font-weight: bold;
+    }
+    .not-ok {
+      color: #b85c00;
+      font-weight: bold;
+    }
+    .categories {
+      margin-top: 0.7rem;
+      font-size: 0.98rem;
+    }
+    .categories ul {
+      padding-left: 1.2em;
+      margin: 0.2em 0 0 0;
+    }
+    .categories li {
+      margin-bottom: 0.2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Comment Moderation</h1>
+    <form id="moderationForm">
+      <textarea id="comment" placeholder="Enter your comment..." required></textarea>
+      <button type="submit">Submit</button>
+    </form>
+    <div id="result" class="result" style="display:none;"></div>
+  </div>
+  <script>
+    const form = document.getElementById('moderationForm');
+    const resultDiv = document.getElementById('result');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      resultDiv.style.display = 'block';
+      resultDiv.innerHTML = '⏳ Checking...';
+      const comment = document.getElementById('comment').value;
+      try {
+        const res = await fetch('/moderate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ comment })
+        });
+        const data = await res.json();
+        if (data.error) {
+          resultDiv.innerHTML = `<span class='not-ok'>❌ Error: ${data.error}</span>`;
+          return;
+        }
+        let categoriesHtml = '<div class="categories"><strong>Categories:</strong><ul>';
+        for (const [cat, flagged] of Object.entries(data.categories)) {
+          categoriesHtml += `<li>${cat}: <strong>${flagged ? '🚩' : '✅'}</strong></li>`;
+        }
+        categoriesHtml += '</ul></div>';
+        let scoresHtml = '<div class="categories"><strong>Scores:</strong><ul>';
+        for (const [cat, score] of Object.entries(data.category_scores)) {
+          scoresHtml += `<li>${cat}: ${score.toFixed(3)}</li>`;
+        }
+        scoresHtml += '</ul></div>';
+        let message = data.flagged
+          ? `<span class='not-ok'>⚠️ Comment is NOT OK — please revise</span>`
+          : `<span class='ok'>✅ Comment is OK</span>`;
+        resultDiv.innerHTML = `${message}${categoriesHtml}${scoresHtml}`;
+      } catch (e) {
+        resultDiv.innerHTML = `<span class='not-ok'>❌ Error occurred</span>`;
+      }
+    });
+  </script>
+</body>
+</html>
