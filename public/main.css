@@ -23,6 +23,10 @@ body {
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  transition: max-width 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+.container.wide {
+  max-width: 900px;
 }
 h1 {
   color: #6750A4;
@@ -49,6 +53,30 @@ textarea:focus {
   outline: none;
   background: #fff;
   box-shadow: 0 2px 8px rgba(103,80,164,0.10);
+}
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-top: 0.5rem;
+  align-items: center;
+}
+button[type="submit"], #compareBtn {
+  max-width: 250px;
+  width: 100%;
+  min-width: 120px;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  justify-content: center;
+}
+.radio-group {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2em;
+  margin-bottom: 0.5rem;
+  width: 100%;
 }
 button {
   background: #6750A4;
@@ -137,10 +165,23 @@ input[type="radio"] {
 label[for="unsafeSlider"] {
   font-size: 1.05em;
 }
+.hidden {
+  display: none !important;
+}
+@media (max-width: 1100px) {
+  .container,
+  .container.wide {
+    max-width: 98vw;
+  }
+}
 @media (max-width: 600px) {
   .container {
     padding: 1.2rem 0.5rem 1rem 0.5rem;
     max-width: 98vw;
+  }
+  #comparison {
+    flex-direction: column;
+    gap: 1.2rem;
   }
   .unsafe-gauge {
     flex-direction: column;
@@ -148,4 +189,67 @@ label[for="unsafeSlider"] {
     gap: 0.7rem;
     padding: 0.7rem 0.5rem;
   }
+  .form-actions {
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+  .radio-group {
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+}
+#comparison {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+  align-items: flex-start;
+}
+.comparison-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 12px rgba(103,80,164,0.13);
+  padding: 1.5rem 1.2rem 1.2rem 1.2rem;
+  min-width: 270px;
+  max-width: 340px;
+  flex: 1 1 270px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  animation: fadeIn 0.5s;
+}
+.comparison-card h2 {
+  font-size: 1.2rem;
+  color: #6750A4;
+  font-weight: 700;
+  margin: 0 0 0.7em 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+}
+.comparison-card .unsafe-gauge {
+  margin: 1em 0 1em 0;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px);}
+  to { opacity: 1; transform: none;}
+}
+.material-header {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  margin-bottom: 2rem;
+}
+.material-icon-lg {
+  font-size: 2.3rem !important;
+  color: #6750A4 !important;
+}
+.material-icon-md {
+  font-size: 1.3em !important;
+  vertical-align: middle;
+}
+.material-icon-radio {
+  font-size: 1.1em !important;
+  vertical-align: middle;
+  color: #6750A4 !important;
 } 

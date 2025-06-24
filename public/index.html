@@ -10,28 +10,34 @@
 </head>
 <body>
   <main class="container" aria-label="Comment Moderation">
-    <header style="display: flex; align-items: center; gap: 0.7em; margin-bottom: 2rem;">
-      <span class="material-icons" style="font-size:2.3rem; color:#6750A4;">gavel</span>
-      <h1 style="margin:0;">Comment Moderation</h1>
+    <header class="material-header">
+      <span class="material-icons material-icon-lg">gavel</span>
+      <h1>Comment Moderation</h1>
     </header>
     <section aria-label="Moderation Form" style="margin-bottom: 1.5rem;">
       <form id="moderationForm" autocomplete="off" style="display: flex; flex-direction: column; gap: 1.2rem;">
         <textarea id="comment" placeholder="Enter your comment..." required aria-label="Comment"></textarea>
-        <div style="display: flex; align-items: center; gap: 1.5em;">
-          <label><input type="radio" name="moderator" value="openai" checked> <span class="material-icons" style="font-size:1.1em;vertical-align:middle;color:#6750A4;">auto_awesome</span> OpenAI</label>
-          <label><input type="radio" name="moderator" value="perspectiveapi"> <span class="material-icons" style="font-size:1.1em;vertical-align:middle;color:#6750A4;">visibility</span> PerspectiveAPI</label>
+        <div class="radio-group">
+          <label><input type="radio" name="moderator" value="openai" checked> <span class="material-icons material-icon-radio">auto_awesome</span> OpenAI</label>
+          <label><input type="radio" name="moderator" value="perspectiveapi"> <span class="material-icons material-icon-radio">visibility</span> PerspectiveAPI</label>
         </div>
-        <button type="submit" aria-label="Submit for Moderation" style="display: flex; align-items: center; gap: 0.5em; justify-content: center;">
-          <span class="material-icons" style="font-size:1.3em;">send</span> Submit
-        </button>
+        <div class="form-actions">
+          <button type="submit" aria-label="Submit for Moderation">
+            <span class="material-icons material-icon-md">send</span> Submit
+          </button>
+          <button type="button" id="compareBtn" aria-label="Compare APIs">
+            <span class="material-icons material-icon-md">compare_arrows</span> Compare APIs
+          </button>
+        </div>
       </form>
     </section>
-    <section class="unsafe-gauge" aria-label="Unsafe Score Gauge">
+    <section class="unsafe-gauge hidden" aria-label="Unsafe Score Gauge">
       <label for="unsafeSlider"><strong>Unsafe Score:</strong></label>
       <input type="range" id="unsafeSlider" min="0" max="100" value="0" disabled aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
       <span id="unsafeValue">0%</span>
     </section>
     <section id="result" class="result" style="display:none; margin-top:2rem;" aria-live="polite"></section>
+    <section id="comparison" style="display:none; margin-top:2rem; gap:2rem; justify-content:center;" aria-label="API Comparison"></section>
   </main>
   <script src="main.js"></script>
 </body>
