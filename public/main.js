@@ -22,7 +22,8 @@ const resultDiv = document.getElementById('result');
 let lastResults = {
   main: null,
   OpenAI: null,
-  Perspective: null
+  Perspective: null,
+  ftgpt: null
 };
 
 function updateFlagsForThreshold(result, prefix, threshold) {
@@ -53,7 +54,7 @@ function renderMainVerdictAndFlags(data, threshold) {
   verdictDiv.className = 'verdict ' + (flagged ? 'not-ok' : 'ok');
   let scoresHtml = '<div class="scores"><strong>Scores:</strong><ul>';
   for (const [cat, score] of Object.entries(data.category_scores)) {
-    scoresHtml += `<li>${cat}: ${score.toFixed(3)}</li>`;
+    scoresHtml += `<li>${cat}: ${(score * 100).toFixed(0)}%</li>`;
   }
   scoresHtml += '</ul></div>';
   // Render verdict, categories, and scores
@@ -73,8 +74,36 @@ compareBtn.addEventListener('click', async () => {
   // Do NOT clear or overwrite the comparisonSection.innerHTML
   // Only update the flags and scores in the existing cards
 
-  // Fetch both APIs in parallel
-  const [openai, perspective] = await Promise.all([
+  comparisonSection.innerHTML = `
+    <div id="comparison-controls" class="comparison-controls">
+      <label for="comparisonSlider"><strong>Unsafe Score Threshold:</strong></label>
+      <input type="range" id="comparisonSlider" min="0" max="100" value="50">
+      <span id="comparisonValue">50%</span>
+    </div>
+    <div class="comparison-side-by-side">
+      <div class="comparison-card" id="card-openai">
+        <h2><span class="material-icons">auto_awesome</span>OpenAI</h2>
+        <div class="verdict" id="verdictOpenAI"></div>
+        <div class="categories" id="categoriesOpenAI"></div>
+        <div class="scores" id="scoresOpenAI"></div>
+      </div>
+      <div class="comparison-card" id="card-perspective">
+        <h2><span class="material-icons">visibility</span>PerspectiveAPI</h2>
+        <div class="verdict" id="verdictPerspective"></div>
+        <div class="categories" id="categoriesPerspective"></div>
+        <div class="scores" id="scoresPerspective"></div>
+      </div>
+      <div class="comparison-card" id="card-ftgpt">
+        <h2><span class="material-icons">star</span>Fine-tuned GPT</h2>
+        <div class="verdict" id="verdictftgpt"></div>
+        <div class="categories" id="categoriesftgpt"></div>
+        <div class="scores" id="scoresftgpt"></div>
+      </div>
+    </div>
+  `;
+
+  // Fetch all three APIs in parallel
+  const [openai, perspective, ftgpt] = await Promise.all([
     fetch('/moderate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -84,16 +113,22 @@ compareBtn.addEventListener('click', async () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ comment, moderator: 'perspectiveapi' })
+    }).then(res => res.json()),
+    fetch('/moderate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ comment, moderator: 'ft-gpt' })
     }).then(res => res.json())
   ]);
 
   lastResults.OpenAI = openai;
   lastResults.Perspective = perspective;
+  lastResults.ftgpt = ftgpt;
 
-  // Helper to update only the flags and scores in the merged categories-scores section
-  function updateCardFlagsAndScores(data, prefix, threshold) {
+  // Helper to update a card (now only for flags and scores)
+  function updateCard(data, prefix, threshold) {
     if (!data || data.error) {
-      document.getElementById(`categoriesScores${prefix}`).innerHTML = `<span class='not-ok'>❌ Error: ${data?.error || 'No response'}</span>`;
+      document.getElementById(`categories${prefix}`).innerHTML = `<span class='not-ok'>❌ Error: ${data?.error || 'No response'}</span>`;
       document.getElementById(`verdict${prefix}`).innerHTML = '';
       return;
     }
@@ -105,65 +140,37 @@ compareBtn.addEventListener('click', async () => {
     const verdictDiv = document.getElementById(`verdict${prefix}`);
     verdictDiv.innerHTML = verdict;
     verdictDiv.className = 'verdict ' + (flagged ? 'not-ok' : 'ok');
-    // Update only the flags and scores in the merged categories-scores section
-    const categoriesScoresDiv = document.getElementById(`categoriesScores${prefix}`);
-    if (!categoriesScoresDiv) return;
-    const lis = categoriesScoresDiv.querySelectorAll('ul > li');
-    lis.forEach(li => {
-      // Extract category name from the text node (after the flag)
-      const text = li.textContent;
-      // Try to match the category name (case-insensitive, ignore spaces/underscores)
-      const match = text.match(/\s([\w\-/]+):/);
-      if (!match) return;
-      const cat = match[1];
-      // Find the actual category in the data (case-insensitive, ignore spaces/underscores)
-      const dataCat = Object.keys(data.category_scores || {}).find(k =>
-        k.replace(/[_\s]/g, '').toLowerCase() === cat.replace(/[_\s]/g, '').toLowerCase()
-      );
-      const score = data.category_scores?.[dataCat] ?? 0;
-      const isFlagged = score >= threshold;
-      // Update the flag
-      const strong = li.querySelector('strong');
-      if (strong) strong.textContent = isFlagged ? '🚩' : '✅';
-      // Update the score and animate the whole li
-      const scoreSpan = li.querySelector('.score');
-      if (scoreSpan) {
-        const prevPercent = parseInt(scoreSpan.textContent.replace('%', ''), 10) || 0;
-        const newPercent = Math.round(score * 100);
-        if (prevPercent !== newPercent) {
-          // Animate the score in 1% steps, faster
-          const step = prevPercent < newPercent ? 1 : -1;
-          let current = prevPercent;
-          const animate = () => {
-            if (current !== newPercent) {
-              current += step;
-              scoreSpan.textContent = current + '%';
-              setTimeout(animate, 8);
-            } else {
-              scoreSpan.textContent = newPercent + '%';
-            }
-          };
-          animate();
-        } else {
-          scoreSpan.textContent = newPercent + '%';
-        }
-      }
-    });
+    updateFlagsForThreshold(data, prefix, threshold);
+    // Scores
+    let scoresHtml = '<strong>Scores:</strong><ul>';
+    for (const [cat, score] of Object.entries(data.category_scores)) {
+      scoresHtml += `<li>${cat}: ${(score * 100).toFixed(0)}%</li>`;
+    }
+    scoresHtml += '</ul>';
+    document.getElementById(`scores${prefix}`).innerHTML = scoresHtml;
   }
 
-  // Use the main comment score threshold slider value
-  const unsafeSlider = document.getElementById('unsafeSlider');
-  function getThreshold() {
-    return unsafeSlider.value / 100;
-  }
+  // Set up shared slider
+  const comparisonSlider = document.getElementById('comparisonSlider');
+  const comparisonValue = document.getElementById('comparisonValue');
   function updateAllComparisonFlags() {
-    const threshold = getThreshold();
-    updateCardFlagsAndScores(lastResults.OpenAI, 'OpenAI', threshold);
-    updateCardFlagsAndScores(lastResults.Perspective, 'Perspective', threshold);
+    const threshold = comparisonSlider.value / 100;
+    comparisonValue.textContent = comparisonSlider.value + '%';
+    updateCard(lastResults.OpenAI, 'OpenAI', threshold);
+    updateCard(lastResults.Perspective, 'Perspective', threshold);
+    updateCard(lastResults.ftgpt, 'ftgpt', threshold);
+    // Update slider color
+    let color;
+    if (threshold > 0.7) color = '#1b7e3c';
+    else if (threshold > 0.3) color = '#f7b500';
+    else color = '#d7263d';
+    comparisonSlider.style.accentColor = color;
+    comparisonValue.style.color = color;
   }
-  // Listen for changes to the main slider
-  unsafeSlider.addEventListener('input', updateAllComparisonFlags);
-  // Initial update
+  comparisonSlider.oninput = updateAllComparisonFlags;
+  // Set initial color and update
+  comparisonSlider.style.accentColor = '#f7b500';
+  comparisonValue.style.color = '#f7b500';
   updateAllComparisonFlags();
 });
 
