@@ -14,12 +14,11 @@ body {
 }
 .container {
   background: #FFFFFF;
-  margin-top: 4rem;
+  margin: 4rem auto;
   padding: 2.5rem 2rem 2rem 2rem;
   border-radius: 16px;
   box-shadow: 0 2px 8px rgba(103,80,164,0.10), 0 1.5px 6px rgba(60,60,60,0.06);
-  max-width: 1000px;
-  margin: 0 auto;
+  max-width: 1360px;
   width: 100%;
   display: flex;
   flex-direction: column;

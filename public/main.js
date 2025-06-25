@@ -23,7 +23,8 @@ let lastResults = {
   main: null,
   OpenAI: null,
   Perspective: null,
-  ftgpt: null
+  ftgpt: null,
+  nano: null
 };
 
 // Helper to format category names for display
@@ -81,8 +82,8 @@ document.addEventListener('DOMContentLoaded', function() {
         alert('Please enter a comment to compare.');
         return;
       }
-      // Fetch all three APIs in parallel
-      const [openai, perspective, ftgpt] = await Promise.all([
+      // Fetch all four APIs in parallel
+      const [openai, perspective, ftgpt, nano] = await Promise.all([
         fetch('/moderate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -97,12 +98,18 @@ document.addEventListener('DOMContentLoaded', function() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ comment, moderator: 'ft-gpt' })
+        }).then(res => res.json()),
+        fetch('/moderate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ comment, moderator: 'ft-nano' })
         }).then(res => res.json())
       ]);
 
       lastResults.OpenAI = openai;
       lastResults.Perspective = perspective;
       lastResults.ftgpt = ftgpt;
+      lastResults.nano = nano;
 
       // Helper to update a card (now only for flags and scores)
       function updateCard(data, prefix, threshold) {
@@ -170,6 +177,7 @@ document.addEventListener('DOMContentLoaded', function() {
         updateCard(lastResults.OpenAI, 'OpenAI', threshold);
         updateCard(lastResults.Perspective, 'Perspective', threshold);
         updateCard(lastResults.ftgpt, 'ftgpt', threshold);
+        updateCard(lastResults.nano, 'nano', threshold);
         // Update slider color
         if (comparisonSlider && comparisonValue) {
           let color;
