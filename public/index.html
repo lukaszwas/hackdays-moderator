@@ -14,30 +14,86 @@
       <span class="material-icons material-icon-lg">gavel</span>
       <h1>Comment Moderation</h1>
     </header>
-    <section aria-label="Moderation Form" style="margin-bottom: 1.5rem;">
-      <form id="moderationForm" autocomplete="off" style="display: flex; flex-direction: column; gap: 1.2rem;">
-        <textarea id="comment" placeholder="Enter your comment..." required aria-label="Comment"></textarea>
-        <div class="radio-group">
-          <label><input type="radio" name="moderator" value="openai" checked> <span class="material-icons material-icon-radio">auto_awesome</span> OpenAI</label>
-          <label><input type="radio" name="moderator" value="perspectiveapi"> <span class="material-icons material-icon-radio">visibility</span> PerspectiveAPI</label>
+    <section aria-label="Article Analysis" style="margin-bottom: 1.5rem;">
+      <div style="display: flex; gap: 2rem; align-items: stretch;">
+        <form id="analysisForm" autocomplete="off" style="flex: 1 1 0; max-width: 50%; display: flex; flex-direction: column; gap: 1.2rem;">
+          <textarea id="analysisText" placeholder="Enter article text for analysis..." required aria-label="Article for Analysis" style="min-height: 400px;"></textarea>
+          <div class="form-actions">
+            <button type="submit" aria-label="Submit for Analysis">
+              <span class="material-icons material-icon-md">insights</span> Analyze
+            </button>
+          </div>
+        </form>
+        <div style="flex: 1 1 0; max-width: 50%; display: flex; flex-direction: column; gap: 1.2rem;">
+          <section id="analysisResult" class="result" style="margin-top:0; min-height: 120px;" aria-live="polite"></section>
+          <section class="unsafe-gauge" aria-label="Comment Score Gauge" style="margin-bottom: 1.5rem;">
+            <label for="unsafeSlider"><strong>Comment Score Threshold:</strong></label>
+            <input type="range" id="unsafeSlider" min="0" max="100" value="50" data-prefix="main">
+            <span id="unsafeValue">50%</span>
+          </section>
+          <form id="moderationForm" autocomplete="off" style="display: flex; flex-direction: column; gap: 1.2rem;">
+            <textarea id="comment" placeholder="Enter your comment..." required aria-label="Comment"></textarea>
+            <div class="form-actions">
+              <button type="button" id="compareBtn" aria-label="Compare APIs">
+                <span class="material-icons material-icon-md">compare_arrows</span> Compare APIs
+              </button>
+            </div>
+          </form>
+          <section id="result" class="result" style="display:none; margin-top:2rem;" aria-live="polite"></section>
         </div>
-        <div class="form-actions">
-          <button type="submit" aria-label="Submit for Moderation">
-            <span class="material-icons material-icon-md">send</span> Submit
-          </button>
-          <button type="button" id="compareBtn" aria-label="Compare APIs">
-            <span class="material-icons material-icon-md">compare_arrows</span> Compare APIs
-          </button>
+      </div>
+    </section>
+    <section id="comparison" style="margin-top:2rem; gap:2rem; justify-content:center; display:flex;" aria-label="API Comparison">
+      <div class="comparison-side-by-side" style="display: flex; gap: 2rem; width: 100%;">
+        <div class="comparison-card" id="card-openai">
+          <h2><span class="material-icons">auto_awesome</span>OpenAI</h2>
+          <div class="verdict" id="verdictOpenAI">Verdict: <span style="color: #888;">(pending)</span></div>
+          <div class="categories-scores" id="categoriesScoresOpenAI">
+            <strong>Categories & Scores:</strong>
+            <ul>
+              <li><strong>✅</strong> harassment: <span class="score">0%</span></li>
+              <li><strong>✅</strong> harassment/threatening: <span class="score">0%</span></li>
+              <li><strong>✅</strong> sexual: <span class="score">0%</span></li>
+              <li><strong>✅</strong> hate: <span class="score">0%</span></li>
+              <li><strong>✅</strong> hate/threatening: <span class="score">0%</span></li>
+              <li><strong>✅</strong> illicit: <span class="score">0%</span></li>
+              <li><strong>✅</strong> illicit/violent: <span class="score">0%</span></li>
+              <li><strong>✅</strong> self-harm/intent: <span class="score">0%</span></li>
+              <li><strong>✅</strong> self-harm/instructions: <span class="score">0%</span></li>
+              <li><strong>✅</strong> self-harm: <span class="score">0%</span></li>
+              <li><strong>✅</strong> sexual/minors: <span class="score">0%</span></li>
+              <li><strong>✅</strong> violence: <span class="score">0%</span></li>
+              <li><strong>✅</strong> violence/graphic: <span class="score">0%</span></li>
+            </ul>
+          </div>
         </div>
-      </form>
+        <div class="comparison-card" id="card-perspective">
+          <h2><span class="material-icons">visibility</span>PerspectiveAPI</h2>
+          <div class="verdict" id="verdictPerspective">Verdict: <span style="color: #888;">(pending)</span></div>
+          <div class="categories-scores" id="categoriesScoresPerspective">
+            <strong>Categories & Scores:</strong>
+            <ul>
+              <li><strong>✅</strong> TOXICITY: <span class="score">0%</span></li>
+              <li><strong>✅</strong> SEVERE_TOXICITY: <span class="score">0%</span></li>
+              <li><strong>✅</strong> IDENTITY_ATTACK: <span class="score">0%</span></li>
+              <li><strong>✅</strong> INSULT: <span class="score">0%</span></li>
+              <li><strong>✅</strong> PROFANITY: <span class="score">0%</span></li>
+              <li><strong>✅</strong> THREAT: <span class="score">0%</span></li>
+              <li><strong>✅</strong> SEXUALLY_EXPLICIT: <span class="score">0%</span></li>
+              <li><strong>✅</strong> FLIRTATION: <span class="score">0%</span></li>
+              <li><strong>✅</strong> ATTACK_ON_AUTHOR: <span class="score">0%</span></li>
+              <li><strong>✅</strong> ATTACK_ON_COMMENTER: <span class="score">0%</span></li>
+              <li><strong>✅</strong> INCOHERENT: <span class="score">0%</span></li>
+              <li><strong>✅</strong> INFLAMMATORY: <span class="score">0%</span></li>
+              <li><strong>✅</strong> LIKELY_TO_REJECT: <span class="score">0%</span></li>
+              <li><strong>✅</strong> OBSCENE: <span class="score">0%</span></li>
+              <li><strong>✅</strong> SPAM: <span class="score">0%</span></li>
+              <li><strong>✅</strong> UNSUBSTANTIAL: <span class="score">0%</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </section>
-    <section class="unsafe-gauge hidden" aria-label="Unsafe Score Gauge">
-      <label for="unsafeSlider"><strong>Unsafe Score Threshold:</strong></label>
-      <input type="range" id="unsafeSlider" min="0" max="100" value="50" data-prefix="main">
-      <span id="unsafeValue">0%</span>
-    </section>
-    <section id="result" class="result" style="display:none; margin-top:2rem;" aria-live="polite"></section>
-    <section id="comparison" style="display:none; margin-top:2rem; gap:2rem; justify-content:center;" aria-label="API Comparison"></section>
   </main>
   <script src="main.js"></script>
 </body>

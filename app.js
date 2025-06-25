@@ -117,6 +117,43 @@ app.post('/moderate', async (req, res) => {
   }
 });
 
+// New endpoint for theme, tone, and sensitivity analysis
+app.post('/analyze', async (req, res) => {
+  const { text } = req.body;
+  if (!text) {
+    return res.status(400).json({ error: 'No text provided.' });
+  }
+  try {
+    // Compose a prompt for GPT
+    const prompt = `Analyze the following text. Identify the central themes (as a comma-separated list), determine the overall emotional tone (e.g., positive, negative, neutral, angry, sad, etc.), and estimate a sensitivity score from 0 to 100% (where 100% is extremely sensitive or emotionally charged, and 0% is not sensitive at all).\n\nText: "${text}"\n\nRespond in JSON with keys: themes (array), tone (string), sensitivity (number, 0-100).`;
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages: [
+        { role: 'system', content: 'You are an expert content analyst.' },
+        { role: 'user', content: prompt }
+      ],
+      temperature: 0.2,
+      max_tokens: 300
+    });
+    const responseText = completion.choices[0]?.message?.content;
+    let analysis;
+    try {
+      analysis = JSON.parse(responseText);
+    } catch (e) {
+      // fallback: try to extract JSON from text
+      const match = responseText.match(/\{[\s\S]*\}/);
+      if (match) {
+        analysis = JSON.parse(match[0]);
+      } else {
+        throw new Error('Could not parse analysis response.');
+      }
+    }
+    res.json(analysis);
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Analysis API error.' });
+  }
+});
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
