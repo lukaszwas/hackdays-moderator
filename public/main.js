@@ -71,9 +71,88 @@ function renderMainVerdictAndFlags(data, threshold) {
   updateFlagsForThreshold(data, 'main', threshold);
 }
 
+// Move updateCard to top-level scope so it's accessible everywhere
+function updateCard(data, prefix, threshold) {
+  if (!data || data.error) {
+    const scoresContainer = document.getElementById(`categoriesScores${prefix}`);
+    if (scoresContainer) {
+      scoresContainer.innerHTML = `<span class='not-ok'>❌ Error: ${data?.error || 'No response'}</span>`;
+    }
+    const verdictDiv = document.getElementById(`verdict${prefix}`);
+    if (verdictDiv) verdictDiv.innerHTML = '';
+    return;
+  }
+  // Verdict
+  const flagged = Object.values(data.category_scores).some(score => score > threshold);
+  let verdict = flagged
+    ? `<span>⚠️ Comment Failed</span>`
+    : `<span>✅ Comment Passed</span>`;
+  const verdictDiv = document.getElementById(`verdict${prefix}`);
+  if (verdictDiv) {
+    verdictDiv.innerHTML = verdict;
+    verdictDiv.className = 'verdict ' + (flagged ? 'not-ok' : 'ok');
+  }
+  // Scores & flags
+  const scoresContainer = document.getElementById(`categoriesScores${prefix}`);
+  if (scoresContainer) {
+    const ul = scoresContainer.querySelector('ul');
+    if (ul) {
+      // Animate each score from its current value to the new value
+      // Build a map of current displayed values
+      const currentScores = {};
+      ul.querySelectorAll('li').forEach(li => {
+        const text = li.textContent || '';
+        const match = text.match(/([\d]+)%/);
+        if (match) {
+          // Try to extract the category name as well
+          const catMatch = text.match(/^[^\w]*([\w\-/ ]+):/i);
+          if (catMatch) {
+            currentScores[catMatch[1].trim().toLowerCase()] = parseInt(match[1], 10);
+          }
+        }
+      });
+      ul.innerHTML = '';
+      for (const [cat, score] of Object.entries(data.category_scores)) {
+        const flagged = score > threshold;
+        const percent = Math.round(score * 100);
+        const catLabel = formatCategoryName(cat);
+        const li = document.createElement('li');
+        li.innerHTML = `<strong>${flagged ? '🚩' : '✅'}</strong> ${catLabel}: <span class="score">0%</span>`;
+        ul.appendChild(li);
+        const span = li.querySelector('span.score');
+        // Use the current displayed value if available, otherwise start from 0
+        const current = currentScores[catLabel.toLowerCase()] ?? 0;
+        animateScore(span, current, percent);
+      }
+    }
+  }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   const compareBtn = document.getElementById('compareBtn');
   const comparisonSection = document.getElementById('comparison');
+  const unsafeSlider = document.getElementById('unsafeSlider');
+  const unsafeValue = document.getElementById('unsafeValue');
+
+  function updateAllComparisonFlags() {
+    const threshold = unsafeSlider && unsafeSlider.value ? unsafeSlider.value / 100 : 0.5;
+    if (unsafeValue && unsafeSlider) unsafeValue.textContent = unsafeSlider.value + '%';
+    updateCard(lastResults.OpenAI, 'OpenAI', threshold);
+    updateCard(lastResults.Perspective, 'Perspective', threshold);
+    updateCard(lastResults.ftgpt, 'ftgpt', threshold);
+    updateCard(lastResults.nano, 'nano', threshold);
+    // Update slider color
+    if (unsafeSlider && unsafeValue) {
+      let color;
+      if (threshold < 0.3) color = '#1b7e3c';
+      else if (threshold < 0.7) color = '#f7b500';
+      else color = '#d7263d';
+      unsafeSlider.style.accentColor = color;
+      unsafeValue.style.color = color;
+    }
+  }
+
+  window.updateAllComparisonFlags = updateAllComparisonFlags;
 
   if (compareBtn) {
     compareBtn.addEventListener('click', async () => {
@@ -111,91 +190,18 @@ document.addEventListener('DOMContentLoaded', function() {
       lastResults.ftgpt = ftgpt;
       lastResults.nano = nano;
 
-      // Helper to update a card (now only for flags and scores)
-      function updateCard(data, prefix, threshold) {
-        if (!data || data.error) {
-          const scoresContainer = document.getElementById(`categoriesScores${prefix}`);
-          if (scoresContainer) {
-            scoresContainer.innerHTML = `<span class='not-ok'>❌ Error: ${data?.error || 'No response'}</span>`;
-          }
-          const verdictDiv = document.getElementById(`verdict${prefix}`);
-          if (verdictDiv) verdictDiv.innerHTML = '';
-          return;
-        }
-        // Verdict
-        const flagged = Object.values(data.category_scores).some(score => score >= threshold);
-        let verdict = flagged
-          ? `<span>⚠️ Comment Failed</span>`
-          : `<span>✅ Comment Passed</span>`;
-        const verdictDiv = document.getElementById(`verdict${prefix}`);
-        if (verdictDiv) {
-          verdictDiv.innerHTML = verdict;
-          verdictDiv.className = 'verdict ' + (flagged ? 'not-ok' : 'ok');
-        }
-        // Scores & flags
-        const scoresContainer = document.getElementById(`categoriesScores${prefix}`);
-        if (scoresContainer) {
-          const ul = scoresContainer.querySelector('ul');
-          if (ul) {
-            // Animate each score from its current value to the new value
-            // Build a map of current displayed values
-            const currentScores = {};
-            ul.querySelectorAll('li').forEach(li => {
-              const text = li.textContent || '';
-              const match = text.match(/([\d]+)%/);
-              if (match) {
-                // Try to extract the category name as well
-                const catMatch = text.match(/^[^\w]*([\w\-/ ]+):/i);
-                if (catMatch) {
-                  currentScores[catMatch[1].trim().toLowerCase()] = parseInt(match[1], 10);
-                }
-              }
-            });
-            ul.innerHTML = '';
-            for (const [cat, score] of Object.entries(data.category_scores)) {
-              const flagged = score >= threshold;
-              const percent = Math.round(score * 100);
-              const catLabel = formatCategoryName(cat);
-              const li = document.createElement('li');
-              li.innerHTML = `<strong>${flagged ? '🚩' : '✅'}</strong> ${catLabel}: <span class=\"score\">0%</span>`;
-              ul.appendChild(li);
-              const span = li.querySelector('span.score');
-              // Use the current displayed value if available, otherwise start from 0
-              const current = currentScores[catLabel.toLowerCase()] ?? 0;
-              animateScore(span, current, percent);
-            }
-          }
-        }
-      }
-
-      // Set up shared slider (if present)
-      const comparisonSlider = document.getElementById('comparisonSlider');
-      const comparisonValue = document.getElementById('comparisonValue');
-      function updateAllComparisonFlags() {
-        const threshold = comparisonSlider && comparisonSlider.value ? comparisonSlider.value / 100 : 0.5;
-        if (comparisonValue && comparisonSlider) comparisonValue.textContent = comparisonSlider.value + '%';
-        updateCard(lastResults.OpenAI, 'OpenAI', threshold);
-        updateCard(lastResults.Perspective, 'Perspective', threshold);
-        updateCard(lastResults.ftgpt, 'ftgpt', threshold);
-        updateCard(lastResults.nano, 'nano', threshold);
-        // Update slider color
-        if (comparisonSlider && comparisonValue) {
-          let color;
-          if (threshold > 0.7) color = '#1b7e3c';
-          else if (threshold > 0.3) color = '#f7b500';
-          else color = '#d7263d';
-          comparisonSlider.style.accentColor = color;
-          comparisonValue.style.color = color;
-        }
-      }
-      if (comparisonSlider && comparisonValue) {
-        comparisonSlider.oninput = updateAllComparisonFlags;
-        updateAllComparisonFlags();
-      } else {
-        // If no slider, just update once at default threshold
-        updateAllComparisonFlags();
-      }
+      updateAllComparisonFlags();
     });
+  }
+
+  // Make unsafeSlider control both single and comparison views
+  if (unsafeSlider && unsafeValue) {
+    unsafeValue.textContent = unsafeSlider.value + '%';
+    unsafeSlider.oninput = function() {
+      const val = parseInt(this.value, 10);
+      unsafeValue.textContent = val + '%';
+      updateAllComparisonFlags();
+    };
   }
 });
 
@@ -250,18 +256,14 @@ if (analysisForm) {
           }
           if (progress < 1) {
             requestAnimationFrame(animateSlider);
+          } else {
+            // Ensure all cards update at the end
+            if (typeof window.updateAllComparisonFlags === 'function') {
+              window.updateAllComparisonFlags();
+            }
           }
         }
         requestAnimationFrame(animateSlider);
-      }
-      // Update slider color on manual input as well
-      if (unsafeSlider) {
-        // Set initial value on page load
-        unsafeValue.textContent = unsafeSlider.value + '%';
-        unsafeSlider.oninput = function() {
-          const val = parseInt(this.value, 10);
-          unsafeValue.textContent = val + '%';
-        };
       }
       // Also update setSliderColor for animation
       function setSliderColor(val) {
