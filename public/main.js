@@ -73,7 +73,23 @@ function renderMainVerdictAndFlags(data, threshold) {
 
 // Move updateCard to top-level scope so it's accessible everywhere
 function updateCard(data, prefix, threshold) {
-  if (!data || data.error) {
+  if (!data) {
+    // Restore default HTML for each card
+    const defaults = {
+      OpenAI: `<strong>Categories & Scores:</strong><ul><li><strong>✅</strong> Harassment: <span class="score">0%</span></li><li><strong>✅</strong> Harassment/threatening: <span class="score">0%</span></li><li><strong>✅</strong> Sexual: <span class="score">0%</span></li><li><strong>✅</strong> Hate: <span class="score">0%</span></li><li><strong>✅</strong> Hate/threatening: <span class="score">0%</span></li><li><strong>✅</strong> Illicit: <span class="score">0%</span></li><li><strong>✅</strong> Illicit/violent: <span class="score">0%</span></li><li><strong>✅</strong> Self-harm/intent: <span class="score">0%</span></li><li><strong>✅</strong> Self-harm/instructions: <span class="score">0%</span></li><li><strong>✅</strong> Self-harm: <span class="score">0%</span></li><li><strong>✅</strong> Sexual/minors: <span class="score">0%</span></li><li><strong>✅</strong> Violence: <span class="score">0%</span></li><li><strong>✅</strong> Violence/graphic: <span class="score">0%</span></li></ul>`,
+      Perspective: `<strong>Categories & Scores:</strong><ul><li><strong>✅</strong> Toxicity: <span class="score">0%</span></li><li><strong>✅</strong> Severe Toxicity: <span class="score">0%</span></li><li><strong>✅</strong> Identity Attack: <span class="score">0%</span></li><li><strong>✅</strong> Insult: <span class="score">0%</span></li><li><strong>✅</strong> Profanity: <span class="score">0%</span></li><li><strong>✅</strong> Threat: <span class="score">0%</span></li><li><strong>✅</strong> Sexually Explicit: <span class="score">0%</span></li><li><strong>✅</strong> Flirtation: <span class="score">0%</span></li><li><strong>✅</strong> Attack On Author: <span class="score">0%</span></li><li><strong>✅</strong> Attack On Commenter: <span class="score">0%</span></li><li><strong>✅</strong> Incoherent: <span class="score">0%</span></li><li><strong>✅</strong> Inflammatory: <span class="score">0%</span></li><li><strong>✅</strong> Likely To Reject: <span class="score">0%</span></li><li><strong>✅</strong> Obscene: <span class="score">0%</span></li><li><strong>✅</strong> Spam: <span class="score">0%</span></li><li><strong>✅</strong> Unsubstantial: <span class="score">0%</span></li></ul>`,
+      ftgpt: `<strong>Categories & Scores:</strong><ul><li><strong>✅</strong> Harassment: <span class="score">0%</span></li><li><strong>✅</strong> Violence: <span class="score">0%</span></li><li><strong>✅</strong> Sexual: <span class="score">0%</span></li><li><strong>✅</strong> Hate: <span class="score">0%</span></li><li><strong>✅</strong> Self-harm: <span class="score">0%</span></li></ul>`,
+      nano: `<strong>Categories & Scores:</strong><ul><li><strong>✅</strong> Toxic: <span class="score">0%</span></li><li><strong>✅</strong> Severe Toxic: <span class="score">0%</span></li><li><strong>✅</strong> Obscene: <span class="score">0%</span></li><li><strong>✅</strong> Threat: <span class="score">0%</span></li><li><strong>✅</strong> Insult: <span class="score">0%</span></li><li><strong>✅</strong> Identity Hate: <span class="score">0%</span></li></ul>`
+    };
+    const scoresContainer = document.getElementById(`categoriesScores${prefix}`);
+    if (scoresContainer && defaults[prefix]) {
+      scoresContainer.innerHTML = defaults[prefix];
+    }
+    const verdictDiv = document.getElementById(`verdict${prefix}`);
+    if (verdictDiv) verdictDiv.innerHTML = 'Verdict: <span style="color: #888;">(pending)</span>';
+    return;
+  }
+  if (data.error) {
     const scoresContainer = document.getElementById(`categoriesScores${prefix}`);
     if (scoresContainer) {
       scoresContainer.innerHTML = `<span class='not-ok'>❌ Error: ${data?.error || 'No response'}</span>`;
@@ -137,6 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function updateAllComparisonFlags() {
     const threshold = unsafeSlider && unsafeSlider.value ? unsafeSlider.value / 100 : 0.5;
     if (unsafeValue && unsafeSlider) unsafeValue.textContent = unsafeSlider.value + '%';
+    // Only update cards if lastResults for that model is not null
     updateCard(lastResults.OpenAI, 'OpenAI', threshold);
     updateCard(lastResults.Perspective, 'Perspective', threshold);
     updateCard(lastResults.ftgpt, 'ftgpt', threshold);
